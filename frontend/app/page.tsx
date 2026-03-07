@@ -41,7 +41,7 @@ export default async function HomePage() {
       {/* Studies List */}
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-bold text-gray-900">Clinical Studies</h2>
-        <span className="text-sm text-gray-500">{studies.length} study{studies.length !== 1 ? "s" : ""}</span>
+        <span className="text-sm text-gray-500">{studies.length} {studies.length !== 1 ? "studies" : "study"}</span>
       </div>
 
       {studies.length === 0 ? (
@@ -98,12 +98,18 @@ export default async function HomePage() {
           <p className="font-semibold text-gray-800 group-hover:text-blue-700">Upload Documents</p>
           <p className="text-xs text-gray-500 mt-1">Add TMF artifacts for analysis</p>
         </Link>
-        {studies[0] && (
+        {studies[0] ? (
           <Link href={`/simulate/${studies[0].id}`} className="card p-5 hover:shadow-md hover:border-blue-200 transition-all group text-center">
             <Shield className="w-8 h-8 text-blue-600 mx-auto mb-2" />
             <p className="font-semibold text-gray-800 group-hover:text-blue-700">Simulate Inspection</p>
             <p className="text-xs text-gray-500 mt-1">Run FDA inspection simulation</p>
           </Link>
+        ) : (
+          <div className="card p-5 text-center opacity-50 cursor-not-allowed">
+            <Shield className="w-8 h-8 text-blue-600 mx-auto mb-2" />
+            <p className="font-semibold text-gray-800">Simulate Inspection</p>
+            <p className="text-xs text-gray-500 mt-1">Run FDA inspection simulation</p>
+          </div>
         )}
         <a href="http://localhost:8000/docs" target="_blank" rel="noopener noreferrer" className="card p-5 hover:shadow-md hover:border-blue-200 transition-all group text-center">
           <Activity className="w-8 h-8 text-blue-600 mx-auto mb-2" />
