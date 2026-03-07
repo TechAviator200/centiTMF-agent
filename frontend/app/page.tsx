@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { api, Study } from "@/lib/api";
 import { formatDate } from "@/lib/utils";

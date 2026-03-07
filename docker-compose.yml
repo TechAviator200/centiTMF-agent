@@ -45,6 +45,7 @@ services:
       S3_ACCESS_KEY: centitmf
       S3_SECRET_KEY: centitmf123
       S3_BUCKET: centitmf-docs
+      AWS_REGION: us-east-1
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       LOG_LEVEL: INFO
     ports:

@@ -140,7 +140,7 @@ def detect_signature_simple(text_lower: str) -> bool | None:
 # ── Core seed function ────────────────────────────────────────────────────────
 
 def seed() -> None:
-    engine = create_engine(settings.SYNC_DATABASE_URL, echo=False)
+    engine = create_engine(settings.sync_database_url, echo=False)
     wait_for_db(engine)
 
     with engine.connect() as conn:

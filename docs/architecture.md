@@ -10,6 +10,8 @@ It processes Trial Master File (TMF) documents, evaluates data-driven compliance
 
 ## System Components
 
+### Local Development (Docker Compose)
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    Docker Compose                        │
@@ -30,6 +32,24 @@ It processes Trial Master File (TMF) documents, evaluates data-driven compliance
 │                             │  Document storage     │    │
 │                             └──────────────────────┘    │
 └─────────────────────────────────────────────────────────┘
+```
+
+### Production Deployment
+
+```
+      Vercel                          Render
+┌─────────────────┐          ┌──────────────────────────┐
+│  Next.js 14     │  HTTPS   │  FastAPI Backend          │
+│  Frontend       │ ───────► │  Docker · Port: $PORT     │
+│  (SSR + Client) │          └──────────┬───────────────┘
+└─────────────────┘                     │
+                                ┌───────┴──────┐
+                                │              │
+                          ┌─────▼──────┐  ┌───▼──────────────┐
+                          │ Supabase   │  │ Cloudflare R2     │
+                          │ Postgres   │  │ (S3-compatible)   │
+                          │ + pgvector │  │ Document storage  │
+                          └────────────┘  └──────────────────┘
 ```
 
 ---
@@ -190,6 +210,40 @@ Server-side fetches use `INTERNAL_API_URL=http://backend:8000` (within Docker). 
 | `frontend/lib/utils.ts` | Shared color/label helpers |
 
 ---
+
+## Production Deployment Notes
+
+### URL Normalization
+
+The backend automatically normalizes database URLs at startup:
+- `postgres://...` → `postgresql+asyncpg://...` (async engine)
+- `postgres://...` → `postgresql://...` (sync engine)
+- `postgresql://...` → `postgresql+asyncpg://...` (async engine)
+
+Supabase, Render, and most PaaS providers emit `postgres://` URLs — this normalization ensures SQLAlchemy compatibility without manual URL editing.
+
+### Port Binding (Render)
+
+Render assigns a dynamic port via the `$PORT` environment variable. The backend CMD reads it:
+```
+CMD sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+```
+Local Docker Compose overrides this CMD with its own command (port 8000 + reload).
+
+### Supabase Connection Strings
+
+Supabase provides two connection URLs:
+- **Pooled (Session Mode, port 6543)** — use for `DATABASE_URL` (FastAPI async engine)
+- **Direct (port 5432)** — use for `SYNC_DATABASE_URL` (seed script)
+
+If only `DATABASE_URL` is set, `SYNC_DATABASE_URL` is derived from it automatically.
+
+### Cloudflare R2 Storage
+
+R2 is S3-compatible. Required configuration:
+- `S3_ENDPOINT_URL`: `https://<account-id>.r2.cloudflarestorage.com`
+- `AWS_REGION`: `auto`
+- Buckets must be pre-created in the Cloudflare dashboard (auto-creation is not available).
 
 ## Security Notes
 

@@ -165,15 +165,79 @@ make reset         # Wipe volumes and rebuild from scratch
 
 ---
 
+## Cloud Deployment
+
+centiTMF is designed to run on:
+
+| Layer | Local | Production |
+|-------|-------|-----------|
+| Frontend | Docker (`localhost:3000`) | Vercel |
+| Backend | Docker (`localhost:8000`) | Render |
+| Database | Docker Postgres | Supabase |
+| Storage | Docker MinIO | Cloudflare R2 |
+
+### Backend on Render
+
+1. Create a new **Web Service** on Render and point it at the repo root.
+2. Set **Dockerfile path** to `./backend/Dockerfile` and **Docker context** to `./backend`.
+3. Add the environment variables below in the Render dashboard.
+4. Render sets `$PORT` automatically — the backend reads it at startup.
+
+**Required backend env vars (Render):**
+
+| Variable | Value |
+|----------|-------|
+| `DATABASE_URL` | Supabase pooled connection string (`postgresql://...`) |
+| `SYNC_DATABASE_URL` | Supabase direct connection string (optional — derived from `DATABASE_URL` if omitted) |
+| `S3_ENDPOINT_URL` | `https://<account-id>.r2.cloudflarestorage.com` |
+| `S3_ACCESS_KEY` | Cloudflare R2 Access Key ID |
+| `S3_SECRET_KEY` | Cloudflare R2 Secret Access Key |
+| `S3_BUCKET` | R2 bucket name (must be pre-created in Cloudflare dashboard) |
+| `AWS_REGION` | `auto` |
+| `OPENAI_API_KEY` | Optional — enables GPT-4o narrative |
+
+### Frontend on Vercel
+
+1. Import the repo into Vercel and set **Root Directory** to `frontend`.
+2. Add the environment variables below in the Vercel dashboard.
+
+**Required frontend env vars (Vercel):**
+
+| Variable | Value |
+|----------|-------|
+| `NEXT_PUBLIC_API_URL` | Your Render backend URL, e.g. `https://centitmf-backend.onrender.com` |
+| `INTERNAL_API_URL` | Same Render backend URL (used for server-side rendering) |
+
+### Supabase Database Notes
+
+- Use the **Session Mode pooler** URL (port 6543) for `DATABASE_URL`.
+- Use the **Direct connection** URL (port 5432) for `SYNC_DATABASE_URL`.
+- Both `postgres://` and `postgresql://` URL schemes are accepted and normalized automatically.
+
+### Cloudflare R2 Notes
+
+- Create your R2 bucket in the Cloudflare dashboard before deploying.
+- Set `AWS_REGION=auto` — R2 does not use AWS regions.
+- R2 is S3-compatible; no code changes are required beyond setting the endpoint and credentials.
+
+---
+
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OPENAI_API_KEY` | *(empty)* | Optional — enables AI narratives and enhanced Audit Questions |
-| `DATABASE_URL` | `postgresql+asyncpg://centitmf:centitmf@postgres:5432/centitmf` | Async Postgres connection |
-| `SYNC_DATABASE_URL` | `postgresql://centitmf:centitmf@postgres:5432/centitmf` | Sync connection (seed script) |
-| `S3_ENDPOINT_URL` | `http://minio:9000` | MinIO / S3 endpoint |
-| `S3_BUCKET` | `centitmf-docs` | Document storage bucket |
+See [.env.example](.env.example) for the full reference with comments.
+
+| Variable | Local default | Description |
+|----------|--------------|-------------|
+| `OPENAI_API_KEY` | *(empty)* | Optional AI enhancement |
+| `DATABASE_URL` | Docker Postgres | Async DB URL for FastAPI |
+| `SYNC_DATABASE_URL` | Derived from `DATABASE_URL` | Sync DB URL for seed script |
+| `S3_ENDPOINT_URL` | `http://minio:9000` | Storage endpoint (MinIO or R2) |
+| `S3_ACCESS_KEY` | `centitmf` | Storage access key |
+| `S3_SECRET_KEY` | `centitmf123` | Storage secret |
+| `S3_BUCKET` | `centitmf-docs` | Bucket name |
+| `AWS_REGION` | `auto` | Region (`auto` for R2) |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8000` | Backend URL for browser |
+| `INTERNAL_API_URL` | `http://backend:8000` | Backend URL for SSR |
 
 ---
 
