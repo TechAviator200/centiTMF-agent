@@ -1,0 +1,188 @@
+{
+  "version": "1.0",
+  "rules": [
+    {
+      "rule_code": "TMF-001",
+      "name": "FDA Form 1572 Missing",
+      "description": "FDA Form 1572 (Statement of Investigator) must be on file for every activated site before any trial activity begins.",
+      "category": "Regulatory Documents",
+      "severity": "HIGH",
+      "scope": "site",
+      "enabled": true,
+      "risk_points": 10,
+      "message_template": "Missing FDA Form 1572 for Site {site_code}",
+      "details": "FDA Form 1572 is a legal commitment by the investigator to conduct the study according to regulatory requirements. It must be signed and on file before site initiation and updated after each protocol amendment.",
+      "condition": {
+        "all": [
+          {"fact": "site_activated", "op": "eq", "value": true},
+          {"fact": "site_has_fda_1572", "op": "eq", "value": false}
+        ]
+      }
+    },
+    {
+      "rule_code": "TMF-002",
+      "name": "Delegation Log Missing or Outdated",
+      "description": "A current Delegation of Authority Log must be on file for every activated site, listing all staff authorized to perform study-related tasks.",
+      "category": "Site Management",
+      "severity": "HIGH",
+      "scope": "site",
+      "enabled": true,
+      "risk_points": 10,
+      "message_template": "Missing Delegation Log for Site {site_code}",
+      "details": "The Delegation Log documents which site staff are authorized to perform study-specific tasks. It must be signed by the Principal Investigator and updated whenever staff changes occur.",
+      "condition": {
+        "all": [
+          {"fact": "site_activated", "op": "eq", "value": true},
+          {"fact": "site_has_delegation_log", "op": "eq", "value": false}
+        ]
+      }
+    },
+    {
+      "rule_code": "TMF-003",
+      "name": "IRB Approval Missing",
+      "description": "Current IRB or Ethics Committee approval must be documented for every activated site.",
+      "category": "Regulatory Documents",
+      "severity": "HIGH",
+      "scope": "site",
+      "enabled": true,
+      "risk_points": 10,
+      "message_template": "Missing IRB Approval documentation for Site {site_code}",
+      "details": "Institutional Review Board approval is mandatory before any study activity at the site. The approval letter must reference the current protocol version.",
+      "condition": {
+        "all": [
+          {"fact": "site_activated", "op": "eq", "value": true},
+          {"fact": "site_has_irb_approval", "op": "eq", "value": false}
+        ]
+      }
+    },
+    {
+      "rule_code": "TMF-004",
+      "name": "Investigator CV Missing",
+      "description": "Principal Investigator Curriculum Vitae must be on file at each activated site.",
+      "category": "Regulatory Documents",
+      "severity": "MEDIUM",
+      "scope": "site",
+      "enabled": true,
+      "risk_points": 5,
+      "message_template": "Missing Investigator CV for Site {site_code}",
+      "details": "The Investigator CV confirms the PI qualifications to conduct the trial. It must be current (typically within 2 years) and signed.",
+      "condition": {
+        "all": [
+          {"fact": "site_activated", "op": "eq", "value": true},
+          {"fact": "site_has_investigator_cv", "op": "eq", "value": false}
+        ]
+      }
+    },
+    {
+      "rule_code": "TMF-005",
+      "name": "Protocol Not on File",
+      "description": "The current approved protocol version must be available for each site.",
+      "category": "Trial Management",
+      "severity": "MEDIUM",
+      "scope": "site",
+      "enabled": true,
+      "risk_points": 5,
+      "message_template": "Study protocol not found in TMF for Site {site_code}",
+      "details": "The approved protocol version must be accessible to site staff. Inspectors verify that site activities align with the protocol version on file.",
+      "condition": {
+        "all": [
+          {"fact": "site_activated", "op": "eq", "value": true},
+          {"fact": "study_has_protocol", "op": "eq", "value": false}
+        ]
+      }
+    },
+    {
+      "rule_code": "TMF-006",
+      "name": "Monitoring Visit Report Missing",
+      "description": "Sites with enrolled subjects must have at least one monitoring visit report on file.",
+      "category": "Monitoring",
+      "severity": "MEDIUM",
+      "scope": "site",
+      "enabled": true,
+      "risk_points": 5,
+      "message_template": "No monitoring visit report on file for Site {site_code}",
+      "details": "Per ICH E6 GCP guidelines, the sponsor must monitor all sites with enrolled subjects. A monitoring visit report documenting oversight activities must be filed in the TMF.",
+      "condition": {
+        "all": [
+          {"fact": "site_activated", "op": "eq", "value": true},
+          {"fact": "has_enrolled_patients", "op": "eq", "value": true},
+          {"fact": "site_has_monitoring_visit_report", "op": "eq", "value": false}
+        ]
+      }
+    },
+    {
+      "rule_code": "TMF-007",
+      "name": "SAE Follow-Up Documentation Missing",
+      "description": "Sites with enrolled subjects must have SAE follow-up documentation when serious adverse events have been reported.",
+      "category": "Safety Reporting",
+      "severity": "HIGH",
+      "scope": "site",
+      "enabled": true,
+      "risk_points": 10,
+      "message_template": "SAE follow-up documentation missing for Site {site_code}",
+      "details": "All serious adverse events must have timely follow-up reports filed in the TMF. Missing SAE follow-up is a critical inspection finding that demonstrates inadequate patient safety monitoring.",
+      "condition": {
+        "all": [
+          {"fact": "site_activated", "op": "eq", "value": true},
+          {"fact": "has_enrolled_patients", "op": "eq", "value": true},
+          {"fact": "site_has_sae_followup", "op": "eq", "value": false}
+        ]
+      }
+    },
+    {
+      "rule_code": "TMF-008",
+      "name": "Informed Consent Form Missing",
+      "description": "The current approved Informed Consent Form must be on file at sites with enrolled subjects.",
+      "category": "Regulatory Documents",
+      "severity": "HIGH",
+      "scope": "site",
+      "enabled": true,
+      "risk_points": 10,
+      "message_template": "Informed Consent Form missing for Site {site_code}",
+      "details": "A current IRB-approved Informed Consent Form must be on file. Inspectors verify that patients signed the version that was approved at the time of consent.",
+      "condition": {
+        "all": [
+          {"fact": "site_activated", "op": "eq", "value": true},
+          {"fact": "has_enrolled_patients", "op": "eq", "value": true},
+          {"fact": "site_has_informed_consent", "op": "eq", "value": false}
+        ]
+      }
+    },
+    {
+      "rule_code": "TMF-009",
+      "name": "Site Initiation Visit Report Missing",
+      "description": "A Site Initiation Visit (SIV) report must be on file for all activated sites.",
+      "category": "Monitoring",
+      "severity": "MEDIUM",
+      "scope": "site",
+      "enabled": true,
+      "risk_points": 5,
+      "message_template": "Site Initiation Visit report missing for Site {site_code}",
+      "details": "The SIV report documents that the site has been trained and assessed as ready to conduct the trial. Required before first patient enrollment.",
+      "condition": {
+        "all": [
+          {"fact": "site_activated", "op": "eq", "value": true},
+          {"fact": "site_has_siv_report", "op": "eq", "value": false}
+        ]
+      }
+    },
+    {
+      "rule_code": "TMF-010",
+      "name": "Unsigned Key Document Detected",
+      "description": "A key regulatory document is on file but lacks a detectable signature.",
+      "category": "Document Quality",
+      "severity": "MEDIUM",
+      "scope": "site",
+      "enabled": true,
+      "risk_points": 5,
+      "message_template": "Unsigned or incomplete document detected at Site {site_code}",
+      "details": "Unsigned regulatory documents are a common inspection finding. All key TMF documents — especially the 1572, Delegation Log, and Consent Forms — must bear investigator or sponsor signatures.",
+      "condition": {
+        "all": [
+          {"fact": "site_activated", "op": "eq", "value": true},
+          {"fact": "site_has_unsigned_document", "op": "eq", "value": true}
+        ]
+      }
+    }
+  ]
+}

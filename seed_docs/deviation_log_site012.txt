@@ -1,0 +1,89 @@
+PROTOCOL DEVIATION LOG
+Study: ABC-001
+Site: 012 - Research Center
+Report Period: January 2024 - March 2024
+
+SITE INFORMATION
+PI: Dr. K. Patel
+Study Coordinator: T. Brown
+
+DEVIATION SUMMARY
+Total Deviations: 8
+Major Deviations: 3
+Minor Deviations: 5
+
+DEVIATION ENTRIES
+
+DEV-012-001
+Date: 2024-01-22
+Category: Major Deviation
+Description: Eligibility criteria not met - Patient 012-002 enrolled despite eGFR reading
+             of 28 (protocol requires eGFR >= 30). Patient enrolled in error.
+Action: Patient withdrawn from study. SAE assessment completed - no harm identified.
+Protocol Section: 4 (Exclusion Criteria)
+Status: Closed
+
+DEV-012-002
+Date: 2024-02-05
+Category: Major Deviation
+Description: Protocol violation - Dosing window exceeded for 3 consecutive doses.
+             Patient 012-005 administered drug outside ±2 hour window.
+Action: Documented, causality assessed. No safety impact.
+Protocol Section: 5 (Dosing Regimen)
+Status: Closed - CAPA submitted
+
+DEV-012-003
+Date: 2024-02-18
+Category: Minor Deviation
+Description: Missed assessment - Week 4 PK sample not collected for Patient 012-003.
+Action: Missing data noted in database. No safety impact.
+Protocol Section: 7 (Assessments)
+Status: Closed
+
+DEV-012-004
+Date: 2024-02-28
+Category: Major Deviation - CRITICAL
+Description: Blinding breach - Study drug assignment inadvertently revealed to site
+             staff during drug reconciliation. Patient 012-007 affected.
+Action: Sponsor notified within 24 hours. Regulatory reporting assessment in progress.
+Protocol Section: 8 (Blinding)
+Status: OPEN - Under regulatory review
+
+DEV-012-005
+Date: 2024-03-08
+Category: Minor Deviation
+Description: Incorrect dosing documented for Patient 012-009. Dose administered at
+             incorrect time on Day 14.
+Action: Documentation corrected in source data.
+Protocol Section: 5 (Dosing Regimen)
+Status: Closed
+
+DEV-012-006
+Date: 2024-03-12
+Category: Minor Deviation
+Description: Documentation error - Visit window exceeded by 2 days for Patient 012-011.
+Action: Deviation logged. No clinical impact.
+Status: Closed
+
+DEV-012-007
+Date: 2024-03-15
+Category: Minor Deviation
+Description: Reminder sent to site regarding GDP failure - source data correction without
+             proper documentation trail.
+Action: Site staff re-trained on GCP/GDP requirements.
+Status: Closed
+
+DEV-012-008
+Date: 2024-03-20
+Category: Minor Deviation
+Description: Late filing - Adverse event form submitted 10 days past required deadline.
+Action: Corrective action implemented. Sponsor notified.
+Status: Closed
+
+TREND ANALYSIS
+Site 012 deviation risk increasing. Deviation rate: 8 deviations in 3 months for 22 enrolled.
+Major deviation rate (3/22 = 13.6%) exceeds acceptable threshold.
+Blinding breach (DEV-012-004) represents critical protocol violation requiring FDA reporting.
+
+SITE RISK RATING: HIGH
+Recommend immediate for-cause monitoring visit.

@@ -1,0 +1,50 @@
+CLINICAL TRIAL PROTOCOL
+Study Title: A Phase II, Randomized, Double-Blind Study of XYZ-101 in Adult Patients
+Protocol Number: ABC-001
+Version: 2.1
+Date: 2023-11-15
+Sponsor: Acme Pharma Inc.
+
+1. PROTOCOL SYNOPSIS
+This study protocol describes a randomized, double-blind, placebo-controlled study
+evaluating the efficacy and safety of XYZ-101 in adult patients aged 18-75.
+
+2. STUDY OBJECTIVES
+Primary: Assess reduction in primary endpoint at 12 weeks.
+Secondary: Assess safety, tolerability, and pharmacokinetics.
+
+3. STUDY DESIGN
+Phase II, multicenter, randomized, double-blind, parallel-group study.
+Target enrollment: 120 patients across 3 sites.
+
+4. ELIGIBILITY CRITERIA
+Inclusion:
+- Age 18-75 years
+- Confirmed diagnosis per protocol section 5.2
+- Signed informed consent
+
+Exclusion:
+- Pregnant or breastfeeding
+- Prior treatment with XYZ-101
+- Significant renal impairment (eGFR < 30)
+
+5. DOSING REGIMEN
+XYZ-101: 50 mg oral, twice daily for 12 weeks
+Placebo: matching tablet, twice daily for 12 weeks
+
+CRITICAL: Dosing window defined as ±2 hours from scheduled time.
+Doses missed beyond this window constitute a protocol deviation.
+
+6. PROTOCOL AMENDMENT HISTORY
+Version 1.0: Initial protocol
+Version 2.0: Amended eligibility criteria (section 4)
+Version 2.1: Clarified dosing window; updated SAE reporting timelines
+
+7. SITES
+Site 004 - General Hospital (Activated 2023-12-01, First Patient In: 2024-01-10)
+Site 012 - Research Center (Activated 2024-01-15, First Patient In: 2024-02-01)
+Site 021 - University Clinic (Activated 2024-01-20, Pending first enrollment)
+
+8. MONITORING
+Per protocol monitoring plan. Minimum 2 monitoring visits per site per year.
+Initial monitoring visit within 30 days of first patient enrollment.

@@ -1,0 +1,52 @@
+STATEMENT OF INVESTIGATOR
+(FORM FDA 1572)
+[OUTDATED VERSION - NOT CURRENT]
+
+Form FDA 1572 (Rev. 07/2012)
+OMB No. 0910-0014
+
+STUDY NUMBER: ABC-001
+DATE: 2022-04-01  [NOTE: This document predates protocol version 2.1 - REQUIRES UPDATE]
+
+1. NAME AND ADDRESS OF INVESTIGATOR
+Dr. R. Williams, MD, PhD
+University Clinic, 500 Research Blvd, Suite 300
+
+2. EDUCATION, TRAINING AND EXPERIENCE
+See attached Curriculum Vitae
+
+3. NAME AND ADDRESS OF ANY MEDICAL SCHOOL, HOSPITAL OR OTHER
+RESEARCH FACILITY WHERE THE CLINICAL INVESTIGATION WILL BE
+CONDUCTED:
+University Clinic - Site 021
+
+4. NAME AND ADDRESS OF ANY CLINICAL LABORATORY FACILITIES TO BE USED:
+University Clinical Lab
+Central Reference Lab (contract)
+
+5. NAME AND ADDRESS OF THE INSTITUTIONAL REVIEW BOARD (IRB)
+University IRB Committee
+Ethics approval reference: UNI-IRB-2022-441
+
+6. NAMES OF THE SUBINVESTIGATORS
+[BLANK - Subinvestigators added in 2024 not reflected]
+
+7. NAME AND CODE NUMBER OF THE PROTOCOL(S)
+Protocol: ABC-001, Version 1.0
+[NOTE: Protocol has been amended to v2.1 - this form has NOT been updated]
+
+8. COMMITMENTS
+I agree to conduct the study in accordance with the relevant, current protocol(s)
+and will only make changes in a protocol after notifying the sponsor...
+
+[Signature block - Signed April 1, 2022]
+Dr. R. Williams
+
+FILING STATUS: OUTDATED
+This FDA 1572 does not reflect:
+- Protocol amendment v2.1 (updated Nov 2023)
+- New subinvestigators added January 2024
+- Updated IRB approval reference
+
+ACTION REQUIRED: Updated FDA 1572 must be obtained and filed.
+RISK LEVEL: HIGH

@@ -1,0 +1,49 @@
+MONITORING VISIT REPORT
+Study: ABC-001
+Site: 004 - General Hospital
+Visit Type: Routine Monitoring Visit
+Visit Date: 2024-03-15
+Monitor: J. Smith, CRA
+
+SITE PERSONNEL PRESENT
+Principal Investigator: Dr. A. Johnson
+Study Coordinator: M. Lee
+
+VISIT SUMMARY
+This was the second routine monitoring visit for Site 004. Site has enrolled 18 patients
+as of visit date. All source data verification (SDV) completed for 15 patients.
+
+FINDINGS
+
+1. Protocol Deviations
+   - 2 patients with documented dosing window exceedance (>2 hours)
+   - 1 patient: visit window exceeded by 4 days for Week 8 assessment
+   These constitute minor protocol deviations and have been logged.
+
+2. Informed Consent
+   - All patients have current version 2.1 ICF on file.
+   - No consent issues identified.
+
+3. Documentation
+   - Source documents complete and legible for verified patients.
+   - Query open: Patient 004-007 Week 4 assessment vitals not transcribed.
+
+4. Drug Accountability
+   - Reconciliation complete. No discrepancies.
+
+5. Regulatory Documents
+   - FDA Form 1572 on file - NOTE: Current PI signature dated 2022-04-01.
+     Form 1572 requires update to reflect protocol amendment v2.1.
+   - Delegation log: OUTDATED - does not include sub-investigator added in Jan 2024.
+     Corrective action required.
+
+RISK ASSESSMENT
+Overall site risk: MEDIUM
+Deviation rate: 2/18 enrolled = 11%
+
+FOLLOW-UP ACTIONS
+1. Site to update FDA Form 1572 for protocol amendment v2.1 (deadline: 30 days)
+2. Site to update delegation log to include new sub-investigator (deadline: 14 days)
+3. Site to resolve open query for Patient 004-007 (deadline: 7 days)
+
+Next monitoring visit scheduled: 2024-06-15

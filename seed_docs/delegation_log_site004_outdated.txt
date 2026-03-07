@@ -1,0 +1,49 @@
+DELEGATION OF AUTHORITY LOG
+Study: ABC-001
+Site: 004 - General Hospital
+Principal Investigator: Dr. A. Johnson, MD
+Date Prepared: 2023-12-01
+
+PURPOSE
+This Delegation of Authority Log documents which study personnel have been
+authorized by the Principal Investigator to perform specific study-related
+tasks at Site 004.
+
+DELEGATED PERSONNEL
+
+Name: M. Lee, RN
+Role: Study Coordinator
+Delegated Tasks:
+  - Patient scheduling and visit coordination
+  - Source document collection
+  - AE/SAE data entry
+  - Query resolution
+Signature: /s/ M. Lee
+Date: 2023-12-01
+
+Name: Dr. B. Chen, MD
+Role: Sub-Investigator
+Delegated Tasks:
+  - Patient informed consent process
+  - Study drug administration oversight
+  - Safety assessments
+Signature: /s/ Dr. B. Chen
+Date: 2023-12-01
+
+INVESTIGATOR SIGNATURE
+I authorize the above individuals to perform the specified study tasks.
+/s/ Dr. A. Johnson, MD
+Date: 2023-12-01
+
+--- IMPORTANT NOTE ---
+This delegation log was prepared at site initiation in December 2023.
+Sub-Investigator Dr. C. Williams joined the study team in January 2024.
+Dr. C. Williams is NOT listed on this delegation log.
+The delegation log requires update to include Dr. C. Williams.
+
+Per monitoring visit report dated 2024-03-15:
+"Delegation log: OUTDATED - does not include sub-investigator added in Jan 2024.
+Corrective action required."
+
+STATUS: OUTDATED - requires update
+MONITORING FINDING: YES (see MVR 2024-03-15)

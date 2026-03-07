@@ -1,0 +1,38 @@
+INSTITUTIONAL REVIEW BOARD APPROVAL LETTER
+
+IRB Name: General Hospital Institutional Review Board
+IRB Registration: FWA00012345
+IRB Protocol Number: GH-IRB-2023-ABC001
+
+Date of Approval: 2023-11-20
+Site: 004 - General Hospital
+
+STUDY INFORMATION
+Study Title: A Phase II, Randomized, Double-Blind Study of XYZ-101 in Adult Patients
+Protocol Number: ABC-001
+Version: 2.0
+Sponsor: Acme Pharma Inc.
+Principal Investigator: Dr. A. Johnson, MD
+
+APPROVAL STATEMENT
+The General Hospital Institutional Review Board has reviewed and approved
+the above referenced research study. This approval is granted for the
+protocol version referenced above.
+
+This approval is valid for one year from the date of this letter.
+Continuing review is required to maintain approval.
+
+NOTE: Protocol Version 2.1 was issued November 2023.
+This IRB approval references Version 2.0.
+Updated IRB approval for protocol version 2.1 has been requested
+but has not yet been received as of the date of this document.
+
+EXPIRATION: This approval expires 2024-11-20.
+
+REQUIRED ACTIONS:
+- Obtain IRB approval for Protocol Version 2.1
+- Submit annual continuing review 90 days prior to expiration
+
+Signed: IRB Chair Dr. Patricia Nguyen
+Date of Signature: 2023-11-20
+/s/ Dr. Patricia Nguyen, IRB Chair
