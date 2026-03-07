@@ -111,7 +111,7 @@ export default async function HomePage() {
             <p className="text-xs text-gray-500 mt-1">Run FDA inspection simulation</p>
           </div>
         )}
-        <a href="http://localhost:8000/docs" target="_blank" rel="noopener noreferrer" className="card p-5 hover:shadow-md hover:border-blue-200 transition-all group text-center">
+        <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/docs`} target="_blank" rel="noopener noreferrer" className="card p-5 hover:shadow-md hover:border-blue-200 transition-all group text-center">
           <Activity className="w-8 h-8 text-blue-600 mx-auto mb-2" />
           <p className="font-semibold text-gray-800 group-hover:text-blue-700">API Explorer</p>
           <p className="text-xs text-gray-500 mt-1">OpenAPI documentation</p>

@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.core.logging import setup_logging, logger
 from app.db.models import Base
@@ -25,8 +26,9 @@ async def lifespan(app: FastAPI):
     logger.info("S3 endpoint: %s | bucket: %s", settings.S3_ENDPOINT_URL or "AWS default", settings.S3_BUCKET)
     logger.info("OpenAI: %s", "configured" if settings.has_openai else "not configured (using deterministic fallback)")
 
-    # Create all tables
+    # Ensure pgvector extension exists before creating tables that use Vector columns
     async with async_engine.begin() as conn:
+        await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         await conn.run_sync(Base.metadata.create_all)
     logger.info("Database tables ready.")
 

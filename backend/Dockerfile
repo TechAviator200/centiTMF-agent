@@ -36,4 +36,4 @@ RUN chmod +x scripts/seed.py 2>/dev/null || true
 # Render assigns a dynamic port via $PORT; default to 8000 for local use.
 EXPOSE 8000
 
-CMD sh -c "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
+CMD sh -c "python scripts/seed.py && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"
