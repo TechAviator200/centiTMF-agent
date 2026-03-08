@@ -99,6 +99,10 @@ class Document(Base):
     full_text: Mapped[Optional[str]] = mapped_column(Text)
     # Heuristic signature detection result
     has_signature: Mapped[Optional[bool]] = mapped_column(Boolean)
+    # Classification: AI-detected type (preserved even after manual override)
+    detected_artifact_type: Mapped[Optional[str]] = mapped_column(String)
+    # Set to True when a user manually overrides the AI classification
+    classification_overridden: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
 
     study: Mapped[Study] = relationship("Study", back_populates="documents")
     site: Mapped[Optional[Site]] = relationship("Site", back_populates="documents")

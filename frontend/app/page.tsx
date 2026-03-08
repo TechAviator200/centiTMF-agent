@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { api, Study } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
-import { FileText, ChevronRight, Activity, Shield } from "lucide-react";
+import { FileText, ChevronRight, Activity, Shield, Play } from "lucide-react";
 
 async function getStudies(): Promise<Study[]> {
   try {
@@ -36,6 +36,24 @@ export default async function HomePage() {
           AI-powered Trial Master File analysis. Predict regulatory inspection risk,
           detect missing artifacts, and identify protocol deviation trends across sites.
         </p>
+        {/* Hero CTA */}
+        <div className="mt-4 flex flex-wrap gap-3">
+          {studies[0] ? (
+            <Link href={`/simulate/${studies[0].id}`} className="btn-primary">
+              <Play className="w-4 h-4" />
+              Run Simulation
+            </Link>
+          ) : (
+            <span className="btn-primary opacity-40 cursor-not-allowed pointer-events-none">
+              <Play className="w-4 h-4" />
+              Run Simulation
+            </span>
+          )}
+          <Link href="/upload" className="btn-secondary">
+            <FileText className="w-4 h-4" />
+            Upload Documents
+          </Link>
+        </div>
       </div>
 
       {/* Studies List */}
@@ -92,29 +110,29 @@ export default async function HomePage() {
       )}
 
       {/* Quick Links */}
-      <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Link href="/upload" className="card p-5 hover:shadow-md hover:border-blue-200 transition-all group text-center">
-          <FileText className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-          <p className="font-semibold text-gray-800 group-hover:text-blue-700">Upload Documents</p>
-          <p className="text-xs text-gray-500 mt-1">Add TMF artifacts for analysis</p>
-        </Link>
-        {studies[0] ? (
-          <Link href={`/simulate/${studies[0].id}`} className="card p-5 hover:shadow-md hover:border-blue-200 transition-all group text-center">
-            <Shield className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-            <p className="font-semibold text-gray-800 group-hover:text-blue-700">Simulate Inspection</p>
-            <p className="text-xs text-gray-500 mt-1">Run FDA inspection simulation</p>
-          </Link>
-        ) : (
-          <div className="card p-5 text-center opacity-50 cursor-not-allowed">
-            <Shield className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-            <p className="font-semibold text-gray-800">Simulate Inspection</p>
-            <p className="text-xs text-gray-500 mt-1">Run FDA inspection simulation</p>
+      <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Link href="/upload" className="card p-5 hover:shadow-md hover:border-blue-200 transition-all group">
+          <div className="flex items-center gap-4">
+            <FileText className="w-8 h-8 text-blue-600 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-gray-800 group-hover:text-blue-700">Upload Documents</p>
+              <p className="text-xs text-gray-500 mt-0.5">Add TMF artifacts · auto-classify · override type</p>
+            </div>
           </div>
-        )}
-        <a href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/docs`} target="_blank" rel="noopener noreferrer" className="card p-5 hover:shadow-md hover:border-blue-200 transition-all group text-center">
-          <Activity className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-          <p className="font-semibold text-gray-800 group-hover:text-blue-700">API Explorer</p>
-          <p className="text-xs text-gray-500 mt-1">OpenAPI documentation</p>
+        </Link>
+        <a
+          href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/docs`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="card p-5 hover:shadow-md hover:border-blue-200 transition-all group"
+        >
+          <div className="flex items-center gap-4">
+            <Activity className="w-8 h-8 text-blue-600 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-gray-800 group-hover:text-blue-700">API Explorer</p>
+              <p className="text-xs text-gray-500 mt-0.5">Interactive OpenAPI documentation</p>
+            </div>
+          </div>
         </a>
       </div>
     </div>

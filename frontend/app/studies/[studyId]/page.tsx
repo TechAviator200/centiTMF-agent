@@ -15,6 +15,7 @@ import {
 import { StatCard } from "@/app/components/StatCard";
 import { RiskBadge } from "@/app/components/RiskBadge";
 import { AuditCopilot } from "@/app/components/AuditCopilot";
+import { ETMFDashboard } from "@/app/components/ETMFDashboard";
 import { AlertTriangle, Users, FileText, Play, ChevronRight, TrendingUp, ShieldCheck, ShieldAlert } from "lucide-react";
 
 async function getStudyData(studyId: string) {
@@ -80,6 +81,9 @@ export default async function StudyPage({
           Simulate FDA Inspection
         </Link>
       </div>
+
+      {/* ── ETMF HEALTH DASHBOARD ──────────────────────────────────────── */}
+      <ETMFDashboard studyId={study.id} />
 
       {/* ── INSPECTION READINESS — primary metric ─────────────────────── */}
       <div className="card p-6 mb-6">
@@ -346,7 +350,7 @@ export default async function StudyPage({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  {["Filename", "Artifact Type", "Site", "Signature", "Uploaded"].map(
+                  {["Filename", "Artifact Type", "Source", "Signature", "Uploaded"].map(
                     (h) => (
                       <th
                         key={h}
@@ -365,9 +369,16 @@ export default async function StudyPage({
                       {doc.filename}
                     </td>
                     <td className="py-3 px-4">
-                      <span className="badge text-blue-700 bg-blue-50 border-blue-200 text-xs">
-                        {doc.artifact_type.replace(/_/g, " ")}
-                      </span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="badge text-blue-700 bg-blue-50 border-blue-200 text-xs">
+                          {doc.artifact_type.replace(/_/g, " ")}
+                        </span>
+                        {doc.classification_overridden && (
+                          <span className="badge text-purple-700 bg-purple-50 border-purple-200 text-xs" title={`AI suggested: ${doc.detected_artifact_type?.replace(/_/g, " ")}`}>
+                            overridden
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-3 px-4 text-gray-500 text-xs">
                       {doc.site_id ? "Site" : "Study"}

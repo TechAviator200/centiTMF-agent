@@ -50,8 +50,22 @@ _TEXT_RULES: list[tuple[str, str]] = [
 
 def classify_artifact(filename: str, text: str = "") -> str:
     """Return best-match artifact type for given filename and text excerpt."""
+    return classify_artifact_with_confidence(filename, text)[0]
+
+
+def classify_artifact_with_confidence(
+    filename: str, text: str = ""
+) -> tuple[str, str]:
+    """
+    Return (artifact_type, confidence_level) for given filename and text.
+
+    confidence_level:
+      "high"   — both filename pattern and text content matched (score >= 5)
+      "medium" — one source matched (score 2-4)
+      "low"    — weak or no match
+    """
     name_lower = filename.lower()
-    text_lower = text.lower()[:2000]  # only inspect first 2000 chars
+    text_lower = text.lower()[:2000]
 
     scores: dict[str, int] = {}
 
@@ -64,6 +78,16 @@ def classify_artifact(filename: str, text: str = "") -> str:
             scores[artifact_type] = scores.get(artifact_type, 0) + 3
 
     if not scores:
-        return "Other"
+        return "Other", "low"
 
-    return max(scores, key=lambda k: scores[k])
+    best_type = max(scores, key=lambda k: scores[k])
+    best_score = scores[best_type]
+
+    if best_score >= 5:
+        confidence = "high"
+    elif best_score >= 2:
+        confidence = "medium"
+    else:
+        confidence = "low"
+
+    return best_type, confidence

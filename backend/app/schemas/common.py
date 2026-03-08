@@ -57,6 +57,8 @@ class DocumentOut(BaseModel):
     doc_date: Optional[datetime]
     text_excerpt: Optional[str]
     has_signature: Optional[bool]
+    detected_artifact_type: Optional[str] = None
+    classification_overridden: bool = False
 
 
 class SimulationOut(BaseModel):

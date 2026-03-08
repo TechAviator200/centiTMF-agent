@@ -1,11 +1,31 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { api, Study, Site } from "@/lib/api";
-import { useEffect } from "react";
-import { Upload, FileText, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { api, Study, Site, UploadResult } from "@/lib/api";
+import { Upload, FileText, CheckCircle, XCircle, Loader2, Edit2, ChevronRight } from "lucide-react";
 
 type Status = "idle" | "uploading" | "success" | "error";
+type OverrideStatus = "idle" | "saving" | "saved" | "error";
+
+const ARTIFACT_TYPES = [
+  "FDA_1572",
+  "Delegation_Log",
+  "IRB_Approval",
+  "Monitoring_Visit_Report",
+  "SAE_Follow_Up",
+  "Investigator_CV",
+  "Protocol",
+  "Deviation_Log",
+  "Informed_Consent",
+  "Site_Activation",
+  "Other",
+];
+
+const CONFIDENCE_LABELS: Record<string, { label: string; color: string }> = {
+  high:   { label: "High confidence",   color: "text-green-700 bg-green-50 border-green-200" },
+  medium: { label: "Medium confidence", color: "text-amber-700 bg-amber-50 border-amber-200" },
+  low:    { label: "Low confidence",    color: "text-red-700 bg-red-50 border-red-200" },
+};
 
 export default function UploadPage() {
   const [studies, setStudies] = useState<Study[]>([]);
@@ -14,10 +34,15 @@ export default function UploadPage() {
   const [siteId, setSiteId] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<Status>("idle");
-  const [result, setResult] = useState<{ artifact_type: string; message: string } | null>(null);
+  const [uploadResult, setUploadResult] = useState<UploadResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Classification override state
+  const [showOverride, setShowOverride] = useState(false);
+  const [selectedType, setSelectedType] = useState("");
+  const [overrideStatus, setOverrideStatus] = useState<OverrideStatus>("idle");
 
   useEffect(() => {
     api.getStudies().then(setStudies).catch(() => {});
@@ -38,8 +63,10 @@ export default function UploadPage() {
   const handleFile = (f: File) => {
     setFile(f);
     setStatus("idle");
-    setResult(null);
+    setUploadResult(null);
     setError(null);
+    setShowOverride(false);
+    setOverrideStatus("idle");
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -55,7 +82,9 @@ export default function UploadPage() {
 
     setStatus("uploading");
     setError(null);
-    setResult(null);
+    setUploadResult(null);
+    setShowOverride(false);
+    setOverrideStatus("idle");
 
     const formData = new FormData();
     formData.append("file", file);
@@ -64,7 +93,8 @@ export default function UploadPage() {
 
     try {
       const res = await api.uploadDocument(formData);
-      setResult({ artifact_type: res.artifact_type, message: res.message });
+      setUploadResult(res);
+      setSelectedType(res.artifact_type);
       setStatus("success");
     } catch (err: any) {
       setError(err.message || "Upload failed");
@@ -72,13 +102,35 @@ export default function UploadPage() {
     }
   };
 
+  const handleConfirmOverride = async () => {
+    if (!uploadResult?.document?.id || selectedType === uploadResult.artifact_type) {
+      setShowOverride(false);
+      return;
+    }
+    setOverrideStatus("saving");
+    try {
+      await api.updateClassification(uploadResult.document.id, selectedType);
+      setUploadResult((prev) =>
+        prev ? { ...prev, artifact_type: selectedType } : prev
+      );
+      setOverrideStatus("saved");
+      setShowOverride(false);
+    } catch {
+      setOverrideStatus("error");
+    }
+  };
+
+  const confidenceMeta = uploadResult
+    ? CONFIDENCE_LABELS[uploadResult.confidence] ?? CONFIDENCE_LABELS.low
+    : null;
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-black text-gray-900 mb-2">Upload Document</h1>
         <p className="text-gray-500 text-sm">
-          Upload PDF or TXT TMF artifacts. The system will auto-classify the artifact type,
-          store it in S3, and generate embeddings.
+          Upload PDF or TXT TMF artifacts. The system auto-classifies the artifact type
+          using AI. You can review and override the classification before finalizing.
         </p>
       </div>
 
@@ -172,30 +224,116 @@ export default function UploadPage() {
           {status === "uploading" ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              Processing...
+              Classifying &amp; processing...
             </>
           ) : (
             <>
               <Upload className="w-4 h-4" />
-              Upload & Classify
+              Upload &amp; Classify
             </>
           )}
         </button>
 
-        {/* Result */}
-        {status === "success" && result && (
-          <div className="card p-5 border-green-200 bg-green-50">
-            <div className="flex items-start gap-3">
+        {/* ── Success + Classification Review ─────────────────────────────── */}
+        {status === "success" && uploadResult && (
+          <div className="card border-green-200 bg-green-50 overflow-hidden">
+            {/* Upload success header */}
+            <div className="flex items-start gap-3 p-5 border-b border-green-100">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="font-semibold text-green-800">Upload successful</p>
-                <p className="text-sm text-green-700 mt-1">{result.message}</p>
-                <div className="mt-2">
-                  <span className="badge text-blue-700 bg-blue-100 border-blue-200">
-                    Classified: {result.artifact_type.replace(/_/g, " ")}
+                <p className="text-sm text-green-700 mt-0.5">{uploadResult.message}</p>
+              </div>
+            </div>
+
+            {/* AI Classification panel */}
+            <div className="p-5 bg-white">
+              <h3 className="text-sm font-bold text-gray-700 mb-3">AI Classification</h3>
+              <div className="flex flex-wrap items-center gap-3 mb-3">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Detected artifact type</p>
+                  <span className="badge text-blue-700 bg-blue-50 border-blue-200">
+                    {uploadResult.artifact_type.replace(/_/g, " ")}
                   </span>
                 </div>
+                {confidenceMeta && (
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Confidence</p>
+                    <span className={`badge text-xs ${confidenceMeta.color}`}>
+                      {confidenceMeta.label}
+                    </span>
+                  </div>
+                )}
+                {uploadResult.has_signature !== null && (
+                  <div>
+                    <p className="text-xs text-gray-500 mb-1">Signature</p>
+                    <span className={`text-xs font-medium ${uploadResult.has_signature ? "text-green-600" : "text-red-500"}`}>
+                      {uploadResult.has_signature ? "✓ Detected" : "✗ Not detected"}
+                    </span>
+                  </div>
+                )}
               </div>
+
+              {/* Override section */}
+              {overrideStatus === "saved" ? (
+                <div className="flex items-center gap-2 text-sm text-purple-700 bg-purple-50 border border-purple-200 rounded-lg px-3 py-2">
+                  <CheckCircle className="w-4 h-4" />
+                  Classification updated to <strong>{selectedType.replace(/_/g, " ")}</strong>
+                </div>
+              ) : showOverride ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                      Override classification
+                    </label>
+                    <select
+                      value={selectedType}
+                      onChange={(e) => setSelectedType(e.target.value)}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {ARTIFACT_TYPES.map((t) => (
+                        <option key={t} value={t}>
+                          {t.replace(/_/g, " ")}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleConfirmOverride}
+                      disabled={overrideStatus === "saving"}
+                      className="btn-primary text-sm py-1.5"
+                    >
+                      {overrideStatus === "saving" ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <CheckCircle className="w-3.5 h-3.5" />
+                      )}
+                      Confirm Override
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setShowOverride(false); setSelectedType(uploadResult.artifact_type); }}
+                      className="btn-secondary text-sm py-1.5"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                  {overrideStatus === "error" && (
+                    <p className="text-xs text-red-600">Failed to save override — please try again.</p>
+                  )}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowOverride(true)}
+                  className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 transition-colors"
+                >
+                  <Edit2 className="w-3.5 h-3.5" />
+                  Override classification
+                </button>
+              )}
             </div>
           </div>
         )}

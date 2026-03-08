@@ -4,7 +4,7 @@
 
 centiTMF answers one question: **"If regulators inspected this study next month, where would we fail?"**
 
-It processes Trial Master File (TMF) documents, evaluates data-driven compliance rules against a normalized fact model, and produces a 0–100 Inspection Readiness Score with an AI-generated narrative.
+It combines an eTMF workflow layer (completeness, timeliness, quality monitoring) with AI-native compliance intelligence: rule evaluation, deviation detection, and a 0–100 Inspection Readiness Score with an AI-generated narrative.
 
 ---
 
@@ -124,12 +124,20 @@ POST /api/audit/questions
 |-------|---------|
 | `studies` | Clinical trial studies |
 | `sites` | Study sites with enrollment and IRB data |
-| `documents` | Uploaded TMF artifacts (S3 key, artifact_type, full_text, has_signature) |
+| `documents` | Uploaded TMF artifacts (S3 key, artifact_type, detected_artifact_type, classification_overridden, full_text, has_signature) |
 | `embeddings` | 1536-dim pgvector embeddings for semantic search |
 | `compliance_rules` | Persisted rule definitions (loaded from seed_rules.json) |
 | `compliance_flags` | Rule violations per site (category, severity, risk_points, facts_snapshot) |
 | `deviation_signals` | Per-site deviation scores and top findings |
 | `inspection_simulations` | Historical simulation results (score, zone, narrative, results_json) |
+
+### Document Classification Fields
+
+| Field | Description |
+|-------|-------------|
+| `artifact_type` | The active (final) classification — may have been user-overridden |
+| `detected_artifact_type` | The original AI classification — always preserved for audit trail |
+| `classification_overridden` | `true` if the user manually changed the classification |
 
 ---
 

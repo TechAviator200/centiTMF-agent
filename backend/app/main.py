@@ -7,7 +7,7 @@ from sqlalchemy import text
 from app.core.logging import setup_logging, logger
 from app.db.models import Base
 from app.db.session import async_engine
-from app.api.routers import studies, documents, compute, simulate, audit
+from app.api.routers import studies, documents, compute, simulate, audit, etmf
 
 
 @asynccontextmanager
@@ -59,6 +59,7 @@ app.include_router(documents.router)
 app.include_router(compute.router)
 app.include_router(simulate.router)
 app.include_router(audit.router)
+app.include_router(etmf.router)
 
 
 @app.get("/health")

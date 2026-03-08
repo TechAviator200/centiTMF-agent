@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models import Document, Site
 from app.db.session import get_db
 from app.schemas.common import DocumentOut
+from app.services.artifact_classifier import ARTIFACT_TYPES, classify_artifact_with_confidence
 from app.services.document_ingestion import ingest_document
 from app.services.s3 import generate_presigned_url
 
@@ -20,8 +21,15 @@ MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB
 class UploadResponse(BaseModel):
     document: DocumentOut
     artifact_type: str
+    detected_artifact_type: str
+    confidence: str
     has_signature: Optional[bool]
     message: str
+
+
+class ClassificationUpdateBody(BaseModel):
+    artifact_type: str
+    override_reason: Optional[str] = None
 
 
 @router.post("/upload", response_model=UploadResponse)
@@ -60,6 +68,9 @@ async def upload_document(
         content_type=file.content_type or "application/octet-stream",
     )
 
+    # Recompute confidence from the stored detected type for response metadata
+    _, confidence = classify_artifact_with_confidence(file.filename, doc.text_excerpt or "")
+
     sig_label = (
         "Signature detected"
         if doc.has_signature is True
@@ -71,6 +82,8 @@ async def upload_document(
     return UploadResponse(
         document=DocumentOut.model_validate(doc),
         artifact_type=doc.artifact_type,
+        detected_artifact_type=doc.detected_artifact_type or doc.artifact_type,
+        confidence=confidence,
         has_signature=doc.has_signature,
         message=f"Classified as {doc.artifact_type.replace('_', ' ')}. {sig_label}.",
     )
@@ -100,6 +113,45 @@ async def get_document(document_id: str, db: AsyncSession = Depends(get_db)):
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     return doc
+
+
+@router.patch("/{document_id}/classification", response_model=DocumentOut)
+async def update_classification(
+    document_id: str,
+    body: ClassificationUpdateBody,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Manually override the AI-classified artifact type.
+
+    Preserves `detected_artifact_type` (original AI pick) and sets
+    `classification_overridden = True` for audit trail purposes.
+    """
+    doc = await db.get(Document, document_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    if body.artifact_type not in ARTIFACT_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid artifact_type. Valid types: {', '.join(ARTIFACT_TYPES)}",
+        )
+
+    # Store the AI-detected type before first override
+    if not doc.classification_overridden and doc.detected_artifact_type is None:
+        doc.detected_artifact_type = doc.artifact_type
+
+    doc.artifact_type = body.artifact_type
+    doc.classification_overridden = True
+    await db.commit()
+    await db.refresh(doc)
+    return DocumentOut.model_validate(doc)
+
+
+@router.get("/artifact-types/list")
+async def list_artifact_types():
+    """Return the list of recognized TMF artifact types."""
+    return {"artifact_types": ARTIFACT_TYPES}
 
 
 @router.get("/{document_id}/download-url")

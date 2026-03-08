@@ -48,12 +48,62 @@ All endpoints are prefixed with `/api`. The API is a standard REST JSON API serv
 
 ---
 
+## eTMF Dashboard
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/etmf/studies/{study_id}/dashboard` | eTMF health summary: Completeness, Timeliness, Quality, Risk, Audit Readiness |
+
+### eTMF Dashboard Response
+
+```json
+{
+  "study_id": "...",
+  "as_of": "2026-03-07T12:00:00Z",
+  "completeness": {
+    "expected_artifacts": 16,
+    "present_artifacts": 10,
+    "completeness_pct": 62.5,
+    "missing_critical_count": 6
+  },
+  "timeliness": {
+    "overdue_monitoring_reports": 1,
+    "stale_documents": 2,
+    "late_filings_count": 3
+  },
+  "quality": {
+    "unsigned_documents": 2,
+    "qc_issue_count": 1
+  },
+  "risk": {
+    "readiness_score": 42.0,
+    "highest_risk_sites": ["012", "004"],
+    "open_critical_flags": 0,
+    "open_high_flags": 8
+  },
+  "audit_readiness": {
+    "top_findings": [
+      { "rule_code": "TMF-001", "title": "Missing FDA Form 1572 for Site 012", "severity": "HIGH", "site_code": "012", "risk_points": 10 }
+    ],
+    "recommended_actions": [
+      "Obtain and file missing regulatory documents (FDA 1572, IRB Approval) for all activated sites",
+      "Update Delegation of Authority Logs to reflect current site personnel"
+    ]
+  }
+}
+```
+
+---
+
 ## Documents
 
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/api/documents` | List documents (optional filters: `study_id`, `site_id`, `artifact_type`) |
-| `POST` | `/api/documents/upload` | Upload and classify a TMF document (multipart form) |
+| `GET` | `/api/documents/{document_id}` | Get a single document by ID |
+| `POST` | `/api/documents/upload` | Upload and AI-classify a TMF document (multipart form) |
+| `PATCH` | `/api/documents/{document_id}/classification` | Override the AI classification for a document |
+| `GET` | `/api/documents/artifact-types/list` | List all recognized artifact types |
 
 ### Upload Request
 
@@ -70,13 +120,28 @@ site_id=<uuid>   (optional — omit for study-level document)
 
 ```json
 {
-  "id": "...",
+  "document": { "id": "...", "artifact_type": "Delegation_Log", "detected_artifact_type": "Delegation_Log", "classification_overridden": false, "..." },
   "artifact_type": "Delegation_Log",
-  "filename": "delegation_log_v2.pdf",
+  "detected_artifact_type": "Delegation_Log",
+  "confidence": "high",
   "has_signature": true,
-  "message": "Document uploaded and classified successfully"
+  "message": "Classified as Delegation Log. Signature detected."
 }
 ```
+
+`confidence` is one of: `high` (filename + text both matched), `medium` (one source matched), `low` (weak or no match).
+
+### Classification Override Request
+
+```json
+PATCH /api/documents/{document_id}/classification
+{
+  "artifact_type": "IRB_Approval",
+  "override_reason": "Misclassified — this is an IRB approval letter"
+}
+```
+
+The original AI-detected type is preserved in `detected_artifact_type`. `classification_overridden` is set to `true`.
 
 ### Recognized Artifact Types
 

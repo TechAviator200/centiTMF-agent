@@ -78,12 +78,59 @@ export interface Document {
   study_id: string;
   site_id: string | null;
   artifact_type: string;
+  detected_artifact_type: string | null;
+  classification_overridden: boolean;
   filename: string;
   s3_key: string;
   uploaded_at: string;
   doc_date: string | null;
   text_excerpt: string | null;
   has_signature: boolean | null;
+}
+
+export interface UploadResult {
+  document: Document;
+  artifact_type: string;
+  detected_artifact_type: string;
+  confidence: string;
+  has_signature: boolean | null;
+  message: string;
+}
+
+export interface ETMFDashboard {
+  study_id: string;
+  as_of: string;
+  completeness: {
+    expected_artifacts: number;
+    present_artifacts: number;
+    completeness_pct: number;
+    missing_critical_count: number;
+  };
+  timeliness: {
+    overdue_monitoring_reports: number;
+    stale_documents: number;
+    late_filings_count: number;
+  };
+  quality: {
+    unsigned_documents: number;
+    qc_issue_count: number;
+  };
+  risk: {
+    readiness_score: number | null;
+    highest_risk_sites: string[];
+    open_critical_flags: number;
+    open_high_flags: number;
+  };
+  audit_readiness: {
+    top_findings: Array<{
+      rule_code: string;
+      title: string;
+      severity: string;
+      site_code: string | null;
+      risk_points: number;
+    }>;
+    recommended_actions: string[];
+  };
 }
 
 export interface AuditAnswer {
@@ -179,8 +226,21 @@ export const api = {
       body: formData,
     }).then((r) => {
       if (!r.ok) return r.text().then((t) => { throw new Error(t); });
-      return r.json();
+      return r.json() as Promise<UploadResult>;
     }),
+
+  updateClassification: (
+    documentId: string,
+    artifactType: string,
+    overrideReason?: string
+  ) =>
+    apiFetch<Document>(`/api/documents/${documentId}/classification`, {
+      method: "PATCH",
+      body: JSON.stringify({ artifact_type: artifactType, override_reason: overrideReason }),
+    }),
+
+  getArtifactTypes: () =>
+    apiFetch<{ artifact_types: string[] }>("/api/documents/artifact-types/list"),
 
   // Compute
   computeMissingDocs: (studyId: string) =>
@@ -197,6 +257,10 @@ export const api = {
     const qs = studyId ? `?study_id=${studyId}` : "";
     return apiFetch<SimulationResult[]>(`/api/simulate/simulations${qs}`);
   },
+
+  // eTMF Dashboard
+  getETMFDashboard: (studyId: string) =>
+    apiFetch<ETMFDashboard>(`/api/etmf/studies/${studyId}/dashboard`),
 
   // Audit Questions
   askAuditQuestion: (studyId: string, question: string) =>

@@ -1,5 +1,5 @@
-import re
 import logging
+from urllib.parse import urlparse
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -8,6 +8,22 @@ logger = logging.getLogger("centitmf.config")
 # Local Docker defaults — only used when env vars are not set
 _LOCAL_ASYNC_URL = "postgresql+asyncpg://centitmf:centitmf@postgres:5432/centitmf"
 _LOCAL_SYNC_URL = "postgresql://centitmf:centitmf@postgres:5432/centitmf"
+
+
+def _log_safe_db_url(url: str) -> str:
+    """
+    Return host:port/db from a database URL for safe logging.
+    Strips the scheme, username, and password — never logs credentials.
+    Example: 'aws-0-us-east-1.pooler.supabase.com:6543/postgres'
+    """
+    try:
+        parsed = urlparse(url)
+        host = parsed.hostname or "unknown"
+        port = f":{parsed.port}" if parsed.port else ""
+        db = parsed.path.lstrip("/") or "unknown"
+        return f"{host}{port}/{db}"
+    except Exception:
+        return "<url-unparseable>"
 
 
 def _normalize_async_url(url: str) -> str:
@@ -78,6 +94,11 @@ class Settings(BaseSettings):
     @property
     def has_openai(self) -> bool:
         return bool(self.OPENAI_API_KEY and self.OPENAI_API_KEY.startswith("sk-"))
+
+    @property
+    def db_host_info(self) -> str:
+        """Safe host:port/db string for logging — no credentials."""
+        return _log_safe_db_url(self.sync_database_url)
 
     @property
     def async_database_url(self) -> str:

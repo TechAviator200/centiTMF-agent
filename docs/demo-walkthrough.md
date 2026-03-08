@@ -1,38 +1,47 @@
 # centiTMF — Demo Walkthrough
 
-A guided 3-minute demo of the centiTMF Inspection Readiness platform.
+A guided 5-minute demo of the centiTMF Inspection Readiness platform.
 
-## Prerequisites
+**Live demo:** [centi-tmf-agent.vercel.app](https://centi-tmf-agent.vercel.app/)
+
+To run locally:
 
 ```bash
 docker compose up --build
+# then open http://localhost:3000
 ```
-
-Open http://localhost:3000.
 
 ---
 
-## Step 1 — Study List
+## Step 1 — Homepage
 
-The home screen shows all clinical studies. The seeded demo includes **ABC-001** (Phase II, Acme Pharma Inc.).
+The home screen shows all clinical studies and the primary action controls.
 
-- Click **ABC-001** to open the study dashboard.
+**Hero area:**
+- **Run Simulation** button — routes directly to the inspection simulation for the first study. Disabled (grayed out) when no studies exist yet.
+- **Upload Documents** button — opens the upload workflow.
+
+The seeded demo includes **ABC-001** (Phase II, Acme Pharma Inc.). Click it to open the study dashboard.
 
 ---
 
 ## Step 2 — Study Dashboard
 
-The study dashboard is the central compliance hub for a single study.
+The study dashboard is the central compliance hub.
 
-**Inspection Readiness Score card** (top of page):
+**eTMF Health Dashboard** (top section):
+- **Completeness** — expected vs present TMF artifacts with a percentage bar and missing critical count
+- **Timeliness** — overdue monitoring reports, stale documents, late filings count
+- **Quality** — unsigned document count, QC issue count
+- **Risk** — inspection readiness score (from last simulation), highest-risk sites, open HIGH/CRITICAL flags
+- **Audit Readiness** — top likely findings and a prioritized recommended action list with quick links
+
+**Inspection Readiness Score card:**
 - If no simulation has been run, it shows flag counts and prompts you to run one
-- After a simulation, it shows the 0–100 score, colored progress bar, and zone badge
+- After a simulation, it shows the 0–100 score, colored progress bar, and zone badge (LOW / MEDIUM / HIGH / CRITICAL)
 
 **Stats row:**
-- Active Sites — how many sites are activated vs total
-- High Risk Flags — combined CRITICAL + HIGH severity
-- Medium Flags — MEDIUM severity
-- Documents — total TMF artifacts on file
+- Active Sites, High Risk Flags, Medium Flags, Documents
 
 **Site Risk Overview table:**
 - Sites sorted by risk (highest flags first)
@@ -41,8 +50,11 @@ The study dashboard is the central compliance hub for a single study.
 
 **Audit Questions panel:**
 - Ask natural-language questions grounded in the study's compliance data
-- Try the suggested chips: "Which sites are highest risk?", "What artifacts are missing?", etc.
-- Type a custom question and press Enter
+- Try: "Which sites are highest risk?", "What artifacts are missing?", "What should be fixed first?"
+
+**TMF Documents table:**
+- Shows artifact type, source (study/site), signature status, upload date
+- Overridden classifications show a purple "overridden" badge
 
 ---
 
@@ -59,7 +71,7 @@ The site page shows:
 
 ---
 
-## Step 4 — Document Upload
+## Step 4 — Document Upload + Classification Override
 
 Navigate to **Upload** (link in navbar or from the study's TMF Documents section).
 
@@ -70,18 +82,22 @@ Navigate to **Upload** (link in navbar or from the study's TMF Documents section
 
 The system:
 - Extracts full text
-- Auto-classifies the artifact type (FDA_1572, Protocol, Delegation_Log, etc.)
+- Auto-classifies the artifact type (FDA_1572, Protocol, Delegation_Log, etc.) with a confidence level (High / Medium / Low)
 - Detects whether the document is signed
-- Generates a 1536-dim embedding
-- Stores the file in MinIO
+- Generates a 1536-dim embedding and stores the file
 
-The response shows the classified artifact type.
+**After upload:** The result panel shows:
+- **AI Classified: [TYPE]** — what the system detected
+- **Confidence** — High / Medium / Low indicator
+- **Override classification** — click to reveal a dropdown with all recognized types, then **Confirm Override** to save your choice
+
+The original AI classification is preserved as `detected_artifact_type` for audit trail purposes. Overridden documents show a purple "overridden" badge on the study dashboard.
 
 ---
 
 ## Step 5 — Inspection Simulation
 
-Navigate to **Simulate** (button in the study header or top nav).
+From the homepage **Run Simulation** button, or from the **Simulate FDA Inspection** button on the study dashboard.
 
 Click **Run New Simulation**.
 
@@ -91,7 +107,7 @@ The simulation:
 3. Computes the readiness score (base 100, subtract penalties)
 4. Generates an AI narrative (GPT-4o if key set, otherwise deterministic)
 
-The results page shows:
+Results show:
 - **Readiness Score gauge** — 0–100 with zone badge
 - **Score breakdown** — flag deductions, cluster penalties, deviation penalties
 - **Regulatory Assessment Narrative** — structured assessment by risk zone
@@ -107,12 +123,12 @@ The results page shows:
 Navigate to http://localhost:8000/docs for the full Swagger interface.
 
 Key endpoints to explore:
-- `GET /api/studies` — list studies
+- `GET /api/etmf/studies/{id}/dashboard` — eTMF health dashboard
 - `GET /api/studies/{id}` — study detail with site summaries
-- `GET /api/studies/{id}/sites/{sid}` — site detail with flags
+- `POST /api/documents/upload` — upload and classify a document
+- `PATCH /api/documents/{id}/classification` — override AI classification
 - `POST /api/simulate/inspection?study_id=...` — run simulation
 - `POST /api/audit/questions` — ask an audit question
-- `POST /api/documents/upload` — upload a document
 
 ---
 

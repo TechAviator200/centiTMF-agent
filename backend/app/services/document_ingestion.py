@@ -20,7 +20,7 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Document, DocumentEmbedding
-from app.services.artifact_classifier import classify_artifact
+from app.services.artifact_classifier import classify_artifact_with_confidence
 from app.services.embeddings import embed_text
 from app.services.s3 import upload_bytes
 
@@ -102,9 +102,9 @@ async def ingest_document(
     full_text = extract_text(filename, content)
     text_excerpt = full_text[:1000]
 
-    # 2. Classify artifact
-    artifact_type = classify_artifact(filename, full_text)
-    logger.info(f"Classified '{filename}' as {artifact_type}")
+    # 2. Classify artifact (also capture confidence for audit trail)
+    artifact_type, _confidence = classify_artifact_with_confidence(filename, full_text)
+    logger.info(f"Classified '{filename}' as {artifact_type} (confidence: {_confidence})")
 
     # 3. Signature detection
     has_signature = detect_signature(full_text)
@@ -125,6 +125,8 @@ async def ingest_document(
         study_id=study_id,
         site_id=site_id,
         artifact_type=artifact_type,
+        detected_artifact_type=artifact_type,  # preserved even after manual override
+        classification_overridden=False,
         filename=filename,
         s3_key=s3_key,
         uploaded_at=datetime.now(timezone.utc),

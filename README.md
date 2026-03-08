@@ -2,6 +2,8 @@
 
 AI-native compliance intelligence for clinical trials.
 
+**Live application:** [centi-tmf-agent.vercel.app](https://centi-tmf-agent.vercel.app/)
+
 centiTMF helps clinical teams maintain inspection readiness, monitor document completeness, detect TMF compliance gaps, and prepare for audits and regulatory review.
 
 ---
@@ -20,12 +22,14 @@ The platform analyzes TMF artifacts and site-level activity to surface risk befo
 
 ## Core Capabilities
 
+- **eTMF Health Dashboard** — at-a-glance Completeness / Timeliness / Quality / Risk metrics with recommended actions
 - **Inspection Readiness Monitoring** — 0–100 readiness score with zone classification (LOW / MEDIUM / HIGH / CRITICAL)
+- **AI Auto-Classification + Manual Override** — AI classifies uploaded documents; users can review and override the classification before filing
 - **Document Completeness Analysis** — automated detection of missing TMF artifacts per site
 - **Missing Artifact Detection** — data-driven compliance rules evaluated against a normalized fact model
 - **Protocol Deviation Intelligence** — cross-document analysis detecting deviation trends and risk signals per site
 - **Site-Level Risk Visibility** — per-site flag counts, deviation scores, and enrollment-gated compliance checks
-- **Inspection Simulation** — composite readiness score with penalty breakdown and AI-generated narrative
+- **Inspection Simulation** — run from the homepage hero or study dashboard; produces composite score, penalty breakdown, and AI narrative
 - **Audit Questions** — ask bounded natural-language questions grounded in study compliance data
 
 ---
@@ -51,26 +55,33 @@ The platform analyzes TMF artifacts and site-level activity to surface risk befo
 ## Architecture Overview
 
 ```
-Document Upload  ──►  Artifact Classifier  ──►  S3 / PostgreSQL
-                                                       │
-                                              Compliance Engine
-                                              (Fact Model + Rules)
-                                                       │
-                                              Deviation Intelligence
-                                              (Text Pattern Scoring)
-                                                       │
-                                              Inspection Simulation
-                                              (Base-100 Scoring + LLM)
-                                                       │
-                                         Audit Questions ──►  Report
+Document Upload  ──►  AI Classifier (+ confidence)  ──►  Manual Override (optional)
+                                                                │
+                                                      S3 / PostgreSQL
+                                                                │
+                                                  eTMF Dashboard Aggregation
+                                                  (Completeness · Timeliness · Quality)
+                                                                │
+                                                     Compliance Engine
+                                                     (Fact Model + Rules)
+                                                                │
+                                                     Deviation Intelligence
+                                                     (Text Pattern Scoring)
+                                                                │
+                                                     Inspection Simulation
+                                                     (Base-100 Scoring + LLM)
+                                                                │
+                                                  Audit Questions ──►  Report
 ```
 
-1. **Document Ingestion** — PDF/TXT upload, rule-based artifact classification, full-text extraction, signature detection, vector embedding
-2. **Fact Model Generation** — `FactBuilder` normalizes each site's state into a deterministic fact dict
-3. **Rule-Based Compliance Detection** — 10 data-driven JSON rules evaluated against the fact model; violations become compliance flags
-4. **Deviation Intelligence** — keyword pattern scoring across site documents detects protocol deviation signals
-5. **Scoring and Simulation** — base-100 subtract model with CRITICAL/HIGH/MEDIUM/LOW deductions and cluster/deviation penalties
-6. **Audit Questions** — bounded Q&A grounded in flags, deviation signals, and simulation outputs; enhanced by GPT-4o when configured
+1. **Document Ingestion** — PDF/TXT upload, rule-based artifact classification with confidence scoring, full-text extraction, signature detection, vector embedding
+2. **Classification Override** — AI classification is preserved as `detected_artifact_type`; user overrides update `artifact_type` and set `classification_overridden = true` for audit trail
+3. **eTMF Dashboard** — aggregates documents, flags, and simulation results into Completeness / Timeliness / Quality / Risk / Audit-Readiness metrics
+4. **Fact Model Generation** — `FactBuilder` normalizes each site's state into a deterministic fact dict
+5. **Rule-Based Compliance Detection** — 10 data-driven JSON rules evaluated against the fact model; violations become compliance flags
+6. **Deviation Intelligence** — keyword pattern scoring across site documents detects protocol deviation signals
+7. **Scoring and Simulation** — base-100 subtract model with CRITICAL/HIGH/MEDIUM/LOW deductions and cluster/deviation penalties
+8. **Audit Questions** — bounded Q&A grounded in flags, deviation signals, and simulation outputs; enhanced by GPT-4o when configured
 
 ---
 
@@ -211,7 +222,8 @@ centiTMF is designed to run on:
 ### Supabase Database Notes
 
 - Use the **Session Mode pooler** URL (port 6543) for `DATABASE_URL`.
-- Use the **Direct connection** URL (port 5432) for `SYNC_DATABASE_URL`.
+- Leave `SYNC_DATABASE_URL` **blank** — it will be derived automatically from `DATABASE_URL`.
+- **Do not** use the direct host (`db.[ref].supabase.co:5432`) for Render deployments — it is IPv6-only and unreachable from Render's IPv4 network.
 - Both `postgres://` and `postgresql://` URL schemes are accepted and normalized automatically.
 
 ### Cloudflare R2 Notes

@@ -485,6 +485,11 @@ def migrate_schema(engine) -> None:
         "ALTER TABLE compliance_flags ADD COLUMN IF NOT EXISTS facts_snapshot JSONB",
         # Backfill severity from risk_level if null
         "UPDATE compliance_flags SET severity = risk_level WHERE severity IS NULL",
+        # Documents: classification audit trail (v2)
+        "ALTER TABLE documents ADD COLUMN IF NOT EXISTS detected_artifact_type VARCHAR",
+        "ALTER TABLE documents ADD COLUMN IF NOT EXISTS classification_overridden BOOLEAN DEFAULT false",
+        # Backfill detected_artifact_type from artifact_type for existing docs
+        "UPDATE documents SET detected_artifact_type = artifact_type WHERE detected_artifact_type IS NULL",
     ]
     with engine.connect() as conn:
         for stmt in migrations:
@@ -547,6 +552,7 @@ def seed() -> None:
     Safe to run on every deploy. If production is in a partial state
     (study exists but missing flags/signals/simulation), this repairs it.
     """
+    logger.info("Connecting (sync) to: %s", settings.db_host_info)
     engine = create_engine(settings.sync_database_url, echo=False)
     wait_for_db(engine)
 
