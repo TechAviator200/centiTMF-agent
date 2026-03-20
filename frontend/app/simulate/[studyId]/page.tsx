@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { api, SimulationResult, Study } from "@/lib/api";
+import { api, SimulationResult, StudyDetail } from "@/lib/api";
 import {
   formatDate,
   readinessScoreColor,
@@ -12,10 +12,10 @@ import {
   riskColor,
 } from "@/lib/utils";
 import { RiskScoreGauge } from "@/app/components/RiskScoreGauge";
-import { ChevronRight, Play, Loader2, AlertTriangle, TrendingUp, FileText, ShieldCheck, ShieldAlert } from "lucide-react";
+import { ChevronRight, Play, LayoutDashboard, Loader2, AlertTriangle, TrendingUp, FileText, ShieldCheck, ShieldAlert } from "lucide-react";
 
 export default function SimulatePage({ params }: { params: { studyId: string } }) {
-  const [study, setStudy] = useState<Study | null>(null);
+  const [study, setStudy] = useState<StudyDetail | null>(null);
   const [simulations, setSimulations] = useState<SimulationResult[]>([]);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,31 +63,47 @@ export default function SimulatePage({ params }: { params: { studyId: string } }
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 mb-1">
-            {study ? study.name : "Study"} — Inspection Simulation
-          </h1>
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-3xl font-black text-gray-900">
+              {study ? study.name : "Study"} — Inspection Readiness
+            </h1>
+            {study?.phase && (
+              <span className="badge text-blue-700 bg-blue-50 border-blue-200">
+                {study.phase}
+              </span>
+            )}
+          </div>
+          {study?.sponsor && (
+            <p className="text-sm text-gray-500 mb-1">{study.sponsor}</p>
+          )}
           <p className="text-gray-500 text-sm">
-            AI-powered FDA inspection readiness scoring. Analyzes TMF completeness,
-            deviation trends, and site-level risk.
+            Evaluates Trial Master File completeness, deviation patterns, and site-level
+            compliance signals to assess FDA inspection readiness.
           </p>
         </div>
-        <button
-          onClick={handleSimulate}
-          disabled={running}
-          className="btn-primary"
-        >
-          {running ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Simulating...
-            </>
-          ) : (
-            <>
-              <Play className="w-4 h-4" />
-              Run New Simulation
-            </>
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <Link href={`/studies/${params.studyId}`} className="btn-secondary">
+            <LayoutDashboard className="w-4 h-4" />
+            View TMF Dashboard
+          </Link>
+          <button
+            onClick={handleSimulate}
+            disabled={running}
+            className="btn-primary"
+          >
+            {running ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Simulating...
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4" />
+                Run New Simulation
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -98,15 +114,36 @@ export default function SimulatePage({ params }: { params: { studyId: string } }
 
       {latest ? (
         <div className="space-y-6">
+          {/* ── Score = 0 critical banner ───────────────────────────────────── */}
+          {score !== null && score === 0 && (
+            <div className="rounded-xl border border-red-300 bg-red-50 p-4 flex items-start gap-3">
+              <ShieldAlert className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-bold text-red-700 text-sm tracking-wide">
+                  FAILED — INSPECTION READINESS
+                </p>
+                <p className="text-xs text-red-600 mt-0.5">
+                  Critical deficiencies detected across the Trial Master File. Immediate
+                  remediation required before any regulatory inspection.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* ── Readiness Score — hero card ────────────────────────────────── */}
-          <div className="card p-8">
+          <div className={`card p-8 ${score !== null && score < 40 ? "border-red-200" : ""}`}>
             <div className="flex items-center gap-2 mb-6">
               {score !== null && score >= 60 ? (
                 <ShieldCheck className="w-5 h-5 text-green-500" />
               ) : (
                 <ShieldAlert className="w-5 h-5 text-red-500" />
               )}
-              <h2 className="font-bold text-gray-900">Inspection Readiness Score</h2>
+              <div>
+                <h2 className="font-bold text-gray-900">Trial Master File — Inspection Readiness</h2>
+                <p className="text-xs text-gray-400">
+                  Based on TMF completeness, deviation patterns, and inspection readiness logic
+                </p>
+              </div>
               <span className="text-xs text-gray-400 ml-auto">
                 Simulated {formatDate(latest.created_at)}
               </span>
@@ -205,16 +242,19 @@ export default function SimulatePage({ params }: { params: { studyId: string } }
             </div>
           )}
 
-          {/* Missing Artifacts */}
+          {/* Missing TMF Artifacts */}
           {latest.results_json?.missing_artifacts && latest.results_json.missing_artifacts.length > 0 && (
             <div className="card p-6">
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-1">
                 <FileText className="w-5 h-5 text-red-500" />
-                <h2 className="font-bold text-gray-900">Missing Artifacts</h2>
+                <h2 className="font-bold text-gray-900">Missing TMF Artifacts</h2>
                 <span className="badge text-red-700 bg-red-50 border-red-200 ml-auto">
                   {latest.results_json.missing_artifacts.length} items
                 </span>
               </div>
+              <p className="text-xs text-gray-400 mb-4">
+                Required documents absent from the Trial Master File at time of simulation.
+              </p>
               <ul className="space-y-2">
                 {latest.results_json.missing_artifacts.map((item, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
@@ -229,10 +269,11 @@ export default function SimulatePage({ params }: { params: { studyId: string } }
           {/* Site Deviation Scores */}
           {latest.results_json?.site_deviation_scores && latest.results_json.site_deviation_scores.length > 0 && (
             <div className="card p-6">
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-1">
                 <TrendingUp className="w-5 h-5 text-amber-500" />
                 <h2 className="font-bold text-gray-900">Site Deviation Risk</h2>
               </div>
+              <p className="text-xs text-gray-400 mb-4">Protocol deviation exposure by site, scored 0–100.</p>
               <div className="space-y-4">
                 {latest.results_json.site_deviation_scores.map((s) => (
                   <div key={s.site_id}>
@@ -357,9 +398,12 @@ export default function SimulatePage({ params }: { params: { studyId: string } }
       ) : (
         <div className="card p-16 text-center">
           <ShieldCheck className="w-16 h-16 text-gray-200 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-gray-500 mb-2">No simulations yet</h3>
-          <p className="text-sm text-gray-400 mb-6">
-            Click &quot;Run New Simulation&quot; to analyze TMF completeness, deviation trends, and site risk.
+          <h3 className="text-xl font-bold text-gray-500 mb-2">No inspection simulation run yet</h3>
+          <p className="text-sm text-gray-400 mb-1">
+            Run a simulation to score this study's Trial Master File against inspection readiness criteria.
+          </p>
+          <p className="text-xs text-gray-400 mb-6">
+            Analyzes TMF completeness, deviation patterns, site compliance flags, and clustering risk.
           </p>
           <button onClick={handleSimulate} disabled={running} className="btn-primary mx-auto">
             {running ? (

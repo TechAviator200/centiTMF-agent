@@ -5,11 +5,11 @@ import { api, AuditAnswer } from "@/lib/api";
 import { MessageSquare, Loader2, ChevronRight, Database } from "lucide-react";
 
 const SUGGESTED_QUESTIONS = [
-  "Which sites are highest risk?",
+  "Which site is highest risk?",
   "What artifacts are missing?",
-  "What should be fixed first?",
+  "What should be fixed before an FDA inspection?",
   "What's driving the score down?",
-  "Give me an overall readiness assessment",
+  "Summarize the TMF compliance posture",
 ];
 
 interface AuditCopilotProps {
@@ -53,8 +53,10 @@ export function AuditCopilot({ studyId }: AuditCopilotProps) {
     <div className="card">
       <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-100">
         <MessageSquare className="w-5 h-5 text-blue-600" />
-        <h2 className="font-bold text-gray-900">Audit Questions</h2>
-        <span className="text-xs text-gray-400 ml-1">Ask about this study's compliance posture</span>
+        <div>
+          <h2 className="font-bold text-gray-900">Audit Copilot</h2>
+          <p className="text-xs text-gray-400">Ask about TMF status, site risk, or inspection readiness</p>
+        </div>
       </div>
 
       <div className="p-5">
@@ -78,7 +80,7 @@ export function AuditCopilot({ studyId }: AuditCopilotProps) {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about this study's inspection readiness..."
+            placeholder="e.g. What artifacts are missing for Site 012?"
             className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button

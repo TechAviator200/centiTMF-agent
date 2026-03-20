@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { api, ETMFDashboard, SiteRiskSummary } from "@/lib/api";
+import { api, ETMFDashboard as ETMFDashboardData, SiteRiskSummary } from "@/lib/api";
 import {
   CheckCircle,
   AlertTriangle,
@@ -66,7 +66,7 @@ function SiteRiskBadge({ level }: { level: "HIGH" | "MEDIUM" | "LOW" }) {
 }
 
 export function ETMFDashboard({ studyId, sites }: Props) {
-  const [data, setData] = useState<ETMFDashboard | null>(null);
+  const [data, setData] = useState<ETMFDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
