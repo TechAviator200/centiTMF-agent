@@ -48,8 +48,6 @@ The platform analyzes TMF artifacts and site-level activity to surface risk befo
 ![Inspection simulation page with readiness score gauge and scoring breakdown](docs/images/screenshot-simulation.png)
 *Simulation generates a 0–100 readiness score with a full penalty breakdown, AI narrative, and site deviation risk chart.*
 
-> **To add screenshots:** save PNG files to `docs/images/` matching the filenames above. See [docs/images/README.md](docs/images/README.md).
-
 ---
 
 ## Architecture Overview
@@ -85,17 +83,47 @@ Document Upload  ──►  AI Classifier (+ confidence)  ──►  Manual Over
 
 ---
 
+## Structured Compliance Model
+
+centiTMF converts raw TMF artifacts and trial activity into a normalized fact model that drives rule evaluation, scoring, simulation, and audit reasoning.
+
+For each site in a study, `FactBuilder` produces a deterministic, structured fact dict:
+
+```json
+{
+  "study_id": "ABC-001",
+  "site_id": "012",
+  "site_activated": true,
+  "patients_enrolled": 22,
+  "has_current_1572": false,
+  "delegation_log_current": false,
+  "monitoring_report_late": true,
+  "deviation_signal_score": 72
+}
+```
+
+These structured facts are:
+
+- **Evaluated against rule definitions** — JSON-defined compliance rules specify conditions on fact fields; violations become typed flags (CRITICAL / HIGH / MEDIUM / LOW)
+- **Aggregated into a risk score** — the scoring model deducts from a base of 100 based on flag severity, site clustering, and deviation signal thresholds
+- **Used to ground audit answers** — the audit Q&A layer reads the same facts, flags, and deviation signals rather than relying on free-form generation
+- **Stored for historical comparison** — each simulation persists a `results_json` snapshot alongside the score, enabling inspection-over-time tracking
+
+This design keeps the reasoning explainable: every penalty, flag, and audit answer can be traced to a named fact and a named rule.
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Backend | FastAPI, Python 3.11, SQLAlchemy 2.0 (async), Pydantic v2 |
-| Database | PostgreSQL 16 + pgvector |
-| Storage | MinIO (S3-compatible) |
+| Database | PostgreSQL 16 + pgvector (Supabase in production) |
+| Storage | Cloudflare R2 (production) · MinIO S3-compatible (local dev) |
 | Frontend | Next.js 14, TypeScript, TailwindCSS (App Router) |
 | Embeddings | OpenAI text-embedding-3-small (deterministic hash fallback) |
 | LLM | GPT-4o (deterministic template fallback) |
-| Infrastructure | Docker Compose |
+| Infrastructure | Docker Compose (local) · Vercel + Render (production) |
 
 ---
 
@@ -105,7 +133,7 @@ Document Upload  ──►  AI Classifier (+ confidence)  ──►  Manual Over
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-org/centiTMF.git
+git clone https://github.com/TechAviator200/centiTMF-agent.git
 cd centiTMF
 
 # 2. (Optional) Configure OpenAI for AI-enhanced narratives and audit answers
@@ -123,7 +151,7 @@ Services:
 | Frontend | http://localhost:3000 |
 | Backend API | http://localhost:8000 |
 | API Docs (Swagger) | http://localhost:8000/docs |
-| MinIO Console | http://localhost:9001 |
+| MinIO Console (local only) | http://localhost:9001 |
 
 On first start, the backend automatically seeds demo study **ABC-001** with three sites and representative TMF documents.
 

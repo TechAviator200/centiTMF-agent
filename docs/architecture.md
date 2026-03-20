@@ -141,6 +141,48 @@ POST /api/audit/questions
 
 ---
 
+## Structured Compliance Model
+
+centiTMF represents the compliance state of each study as a normalized fact model — a flat, deterministic mapping of study, site, artifact, and signal state that the reasoning layer evaluates against.
+
+### Semantic Relationships
+
+The model captures structured relationships across five entity types:
+
+| Entity | Key fields |
+|--------|-----------|
+| `Study` | id, title, phase, sponsor |
+| `Site` | study_id, irb_approved, patients_enrolled, site_activated |
+| `Document` | site_id, artifact_type, has_signature, classification_overridden |
+| `ComplianceFlag` | site_id, rule_id, severity, category, risk_points, facts_snapshot |
+| `DeviationSignal` | site_id, score, top_keywords |
+| `InspectionSimulation` | study_id, score, zone, results_json |
+
+### Fact Model
+
+`FactBuilder` collapses these relationships into a flat fact dict per site at query time:
+
+```python
+{
+  "site_activated": True,
+  "has_enrolled_patients": True,
+  "site_has_fda_1572": False,
+  "delegation_log_current": False,
+  "monitoring_report_late": True,
+  "study_has_protocol": True,
+  "site_has_unsigned_document": False,
+  "deviation_score": 72.0
+}
+```
+
+This normalization is the key design choice: all downstream reasoning — rule evaluation, scoring, audit grounding — operates on the same structured representation rather than on unstructured document text.
+
+### Explainability
+
+Because every flag references a `facts_snapshot` and every answer references the same fact model, the system can attribute any penalty or audit response to a named fact and a named rule. There are no black-box deductions — the reasoning chain is fully auditable.
+
+---
+
 ## Compliance Engine
 
 The compliance engine uses a two-component design:
