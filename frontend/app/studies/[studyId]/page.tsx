@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { api } from "@/lib/api";
 import {
   formatDate,
+  formatRelativeTime,
   readinessScoreColor,
   readinessScoreBarColor,
   readinessZoneColor,
@@ -16,7 +17,7 @@ import { StatCard } from "@/app/components/StatCard";
 import { RiskBadge } from "@/app/components/RiskBadge";
 import { AuditCopilot } from "@/app/components/AuditCopilot";
 import { ETMFDashboard } from "@/app/components/ETMFDashboard";
-import { AlertTriangle, Users, FileText, Play, ChevronRight, TrendingUp, ShieldCheck, ShieldAlert } from "lucide-react";
+import { AlertTriangle, Users, FileText, Play, Upload, MessageSquare, ChevronRight, TrendingUp, ShieldCheck, ShieldAlert } from "lucide-react";
 
 async function getStudyData(studyId: string) {
   try {
@@ -76,14 +77,53 @@ export default async function StudyPage({
             {study.sponsor || "No sponsor"} · Created {formatDate(study.created_at)}
           </p>
         </div>
-        <Link href={`/simulate/${study.id}`} className="btn-primary">
-          <Play className="w-4 h-4" />
-          Simulate FDA Inspection
-        </Link>
+        <div className="flex items-center gap-4">
+          {/* Inspection Readiness Score badge */}
+          {readinessScore !== null && (
+            <div className="text-right">
+              <div className="flex items-center gap-2">
+                <span className={`text-3xl font-black leading-none ${readinessScoreColor(readinessScore)}`}>
+                  {readinessScore.toFixed(0)}
+                </span>
+                <div>
+                  <p className="text-xs text-gray-400 leading-none">/ 100</p>
+                  <span className={`badge text-xs mt-0.5 ${readinessZoneColor(latestSim?.vulnerable_zone)}`}>
+                    {readinessZoneLabel(latestSim?.vulnerable_zone)}
+                  </span>
+                </div>
+              </div>
+              {latestSim && (
+                <p className="text-xs text-gray-400 mt-1">
+                  Last simulated {formatRelativeTime(latestSim.created_at)}
+                </p>
+              )}
+            </div>
+          )}
+          <Link href={`/simulate/${study.id}`} className="btn-primary">
+            <Play className="w-4 h-4" />
+            Simulate FDA Inspection
+          </Link>
+        </div>
       </div>
 
       {/* ── ETMF HEALTH DASHBOARD ──────────────────────────────────────── */}
-      <ETMFDashboard studyId={study.id} />
+      <ETMFDashboard studyId={study.id} sites={study.sites} />
+
+      {/* Action Bar */}
+      <div className="flex flex-wrap items-center gap-3 mb-6 px-5 py-4 bg-gray-50 rounded-xl border border-gray-100">
+        <Link href={`/simulate/${study.id}`} className="btn-primary">
+          <Play className="w-4 h-4" />
+          Run Simulation
+        </Link>
+        <Link href="/upload" className="btn-secondary">
+          <Upload className="w-4 h-4" />
+          Upload Document
+        </Link>
+        <a href="#audit-copilot" className="btn-secondary">
+          <MessageSquare className="w-4 h-4" />
+          Ask Audit Copilot
+        </a>
+      </div>
 
       {/* ── INSPECTION READINESS — primary metric ─────────────────────── */}
       <div className="card p-6 mb-6">
@@ -325,7 +365,7 @@ export default async function StudyPage({
       </div>
 
       {/* Audit Questions */}
-      <div className="mb-6">
+      <div id="audit-copilot" className="mb-6">
         <AuditCopilot studyId={study.id} />
       </div>
 
